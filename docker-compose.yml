@@ -1,0 +1,19 @@
+version: '3.7'
+services:
+  jenkins:
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: jenkinsDocker
+    image: jenkins-docker:1.0
+    container_name: jenkinsServer
+    networks:
+      my_network:
+        ipv4_address: 10.10.10.3
+networks:
+  my_network:
+    ipam:
+      driver: l2bridge
+      config:
+        - subnet: 10.10.10.0/24

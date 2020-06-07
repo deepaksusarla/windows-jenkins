@@ -1,0 +1,43 @@
+FROM mcr.microsoft.com/windows/servercore:1903
+
+SHELL ["powershell"]
+
+USER ContainerAdministrator
+
+RUN mkdir SetupFiles
+
+RUN mkdir SourceCode
+
+RUN mkdir Jenkins
+
+ADD SetupFiles/FontsToAdd.tar /Fonts/
+
+WORKDIR /Fonts/
+
+RUN .\\Add-Font.ps1 Fonts
+
+WORKDIR /
+
+COPY SetupFiles/ /SetupFiles/
+
+#Installing choco manager, git, nodejs, chrome, firefox and java
+RUN ["powershell", "c:/SetupFiles/RunInstallers.ps1"]
+
+ADD http://mirrors.jenkins-ci.org/windows-stable/jenkins-2.222.4.zip /SetupFiles/jenkins-2.222.4.zip
+
+RUN Expand-Archive c:\SetupFiles\jenkins-2.222.4.zip c:\SetupFiles
+
+RUN msiexec /i c:\SetupFiles\jenkins.msi LicenseAccepted="0" ADDLOCAL=ALL JENKINSDIR="c:\Jenkins" /quiet /qn /passive /norestart
+
+RUN npm install -g grunt-cli 
+
+RUN npm install -g typescript
+
+RUN  Add-Content -Path C:\Windows\System32\drivers\etc\hosts  -Value '127.0.0.1 dmr.jenkins.com'
+
+EXPOSE 8080
+EXPOSE 443
+
+#ENTRYPOINT powershell.exe C:\SetupFiles\EntryPoint.ps1
+
+
